@@ -38,9 +38,12 @@ auditable, not re-derived freshly each run. Keep the gate deterministic; use the
 
 2. **Run the deterministic scanner.**
    ```bash
-   pdpl-scan <path> --entity <type> --json findings.json --markdown report.md
+   pdpl-scan <path> --entity <type> --json findings.json --markdown report.md --html report.html
    ```
    If the package is not installed, run it from the repo: `pip install -e .` then `pdpl-scan ...`.
+   Each finding carries a `status`: `fail` = confirmed auto finding (gates the build); `warn` = an
+   assisted **LEAD** to triage. Some LEADs (`DSR-01`/`RET-01`/`LB-01`) are **repo-wide** and have no
+   `file:line` — judge them against the whole tree. `passed_controls` lists auto checks that ran clean.
 
 3. **Triage every finding.** For each candidate in `findings.json`, open the cited `file:line` and
    decide:

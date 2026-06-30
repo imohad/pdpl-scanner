@@ -289,3 +289,13 @@ def test_html_report_bilingual():
     assert 'class="rtl"' in html
     assert "not a legal certification" in html
     assert "الملاحظات" in html   # Arabic findings heading
+
+
+def test_yaml_mirror_in_sync_with_catalog():
+    """Every control in controls.py must also appear in the human-readable YAML mirror (no drift)."""
+    from pdpl_scanner.controls import CORE_CONTROLS, MANUAL_CONTROLS
+    yaml_path = os.path.join(os.path.dirname(__file__), "..", "controls", "pdpl-controls.yaml")
+    with open(yaml_path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    missing = [cid for cid in list(CORE_CONTROLS) + list(MANUAL_CONTROLS) if cid not in text]
+    assert not missing, f"controls missing from controls/pdpl-controls.yaml: {missing}"
