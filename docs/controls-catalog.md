@@ -14,8 +14,8 @@ and `pdpl_scanner/controls.py`. This page is the readable summary.
 
 | ID | Domain | Severity | Mode | PDPL reference | What it catches |
 |---|---|---|---|---|---|
-| `PDPL-LB-01` | Legal Basis & Consent | critical | assisted | Arts. 5-6 | Personal-data write with no consent / legal-basis gate |
-| `PDPL-LB-03` | Legal Basis & Consent | high | auto | Art. 6 | Pre-ticked / default-on consent |
+| `PDPL-LB-01` | Legal Basis & Consent | critical | assisted | Arts. 5–7 | Personal-data write with no consent / legal-basis gate |
+| `PDPL-LB-03` | Legal Basis & Consent | high | auto | Arts. 5, 7 | Pre-ticked / default-on consent |
 | `PDPL-DSR-01` | Data Subject Rights | high | assisted | Arts. 4, 9 | No data access / export path for subjects |
 | `PDPL-DSR-02` | Data Subject Rights | high | assisted | Arts. 4, 18 | Soft-delete-only erasure (PII retained) |
 | `PDPL-CB-01` | Cross-Border Transfer | critical¹ | auto | Art. 29 + Transfer Regs | Personal data reaching a non-KSA region/endpoint |
@@ -71,7 +71,7 @@ Added automatically based on entity type (see [entity-types.md](entity-types.md)
 | Overlay | Example controls |
 |---|---|
 | NDMO | Data classification applied; CDPO / data office; periodic NDMO reports |
-| NCA-ECC | Hosting and storage inside the Kingdom (ECC 4.2.3.3) |
+| NCA-ECC | Hosting and storage inside the Kingdom (ECC-2:2024) |
 | NCA-CCC | Cloud Cybersecurity Controls for the hosting model |
 | SAMA | Cloud approval before use and for any cloud outside KSA; in-Kingdom residency + key management; outsourcing register |
 | CST-CCRF | Workloads mapped to cloud level; Saudi Government content not exported |

@@ -15,22 +15,31 @@ verify high-stakes decisions against the authority's current published text and 
 - SDAIA — Laws and Regulations: https://sdaia.gov.sa/en/SDAIA/about/Pages/RegulationsAndPolicies.aspx
 
 Key obligations encoded here:
-- Lawful basis for processing (consent as the default basis); explicit, withdrawable consent.
-- Data subject rights: access, correction, deletion, portability, right to be informed.
+- Lawful basis for processing (consent as the default basis): **consent is governed by Art. 5**
+  (Art. 5(2) gives the withdrawal right) and **Art. 7** (consent may not be a precondition of a
+  service); **Art. 6 lists the cases where processing needs *no* consent** — so affirmative-consent
+  controls cite Arts. 5/7, not Art. 6.
+- Data subject rights (**PDPL Art. 4**: informed, access, obtain-a-copy, correction, destruction):
+  access detail in Art. 9, retention/destruction carve-out in Art. 18.
 - **Breach notification**: notify SDAIA within **72 hours** of awareness (Art. 20 PDPL, Art. 24
   Implementing Regulations, Personal Data Breach Incidents Procedural Guide). No materiality threshold;
   notify affected subjects where harm is likely.
 - **Records of Processing Activities (RoPA)**: purposes, data categories, recipients, cross-border
   arrangements, retention, security measures; retained and produced to SDAIA on request.
 - **DPIA** for high-risk / large-scale sensitive / automated-decision processing.
-- **Cross-border transfer** (Art. 29 + Transfer Regulations + Transfer Risk Assessment guidance):
-  lawful basis for processing and for transfer; adequacy or safeguards (SCCs, BCRs, certificates);
-  a transfer risk assessment; minimization. The adequacy list was not yet published as of mid-2025.
-- **Controller registration** and **DPO appointment** rules (being consolidated into the Implementing
-  Regulations), with DPO contact details submitted to SDAIA's platform.
-- **Penalties**: administrative fines up to **SAR 5 million**; criminal sanctions up to **2 years +
-  SAR 3 million** for unlawful disclosure of sensitive data and **1 year + SAR 1 million** for unlawful
-  transfer; penalties may double for repeat violations.
+- **Cross-border transfer** (Art. 29 + standalone Transfer Regulation + Feb/Mar-2025 Risk Assessment
+  Guideline): Art. 29(2) requires no prejudice to national interests, an adequate level of protection,
+  and minimization. SDAIA has **not yet published the adequacy/"appropriate level of protection"
+  country list** (Transfer Regulation Art. 3 creates the mechanism, reviewed every 4 years), so
+  transfers rely on **exactly three appropriate safeguards** — Standard Contractual Clauses (SDAIA's
+  four SCC forms, Sep 2024, non-modifiable), **Binding Common Rules** (not "binding corporate rules"),
+  and a Certificate of accreditation — plus a transfer risk assessment (Transfer Reg Art. 7).
+- **Controller registration** (National Data Governance Platform — a qualified obligation) and
+  **DPO appointment** rules, with DPO contact details submitted to SDAIA's platform.
+- **Penalties**: **Art. 35** — up to **2 years + SAR 3 million** for disclosing/publishing sensitive
+  personal data with intent to harm or for personal benefit; **Art. 36** — up to **SAR 5 million** for
+  other violations; fines may **double for repeat** violations (a PDPL Violations Committee issues the
+  administrative fines).
 
 ## NDMO — National Data Management Office (under SDAIA)
 
@@ -49,8 +58,10 @@ Key obligations encoded here:
 
 ## NCA — National Cybersecurity Authority
 
-- **Essential Cybersecurity Controls (ECC)** — section 4.2.3.3 requires information hosting and storage
-  **inside the Kingdom** for government, semi-government, and CNI operators.
+- **Essential Cybersecurity Controls** — current version **ECC-2:2024** (a restructuring of ECC-1:2018,
+  108 controls, hyphenated numbering) requires information hosting and storage **inside the Kingdom**
+  for government, semi-government, and CNI operators. (The old ECC-1:2018 dotted clause "4.2.3.3" does
+  not carry over to ECC-2:2024's numbering — cite the standard, verify the clause against current text.)
 - **Cloud Cybersecurity Controls (CCC)** for cloud hosting models.
 - **Data Cybersecurity Controls (DCC)** operationalizing PDPL security obligations.
 

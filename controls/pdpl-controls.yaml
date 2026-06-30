@@ -15,7 +15,7 @@ controls:
     domain: Legal Basis & Consent
     severity: critical
     mode: assisted
-    pdpl_ref: "Arts. 5-6 (lawful basis; consent default)"
+    pdpl_ref: "Arts. 5–7 (lawful basis: consent Art. 5, non-consent bases Art. 6, no-precondition Art. 7)"
     detect: "Personal-data write with no preceding consent/legal-basis gate."
     fix_en: "Gate every personal-data write on a documented lawful basis; persist legal_basis, purpose, consent_timestamp, consent_version."
 
@@ -23,7 +23,7 @@ controls:
     domain: Legal Basis & Consent
     severity: high
     mode: auto
-    pdpl_ref: "Art. 6 (free, affirmative consent)"
+    pdpl_ref: "Art. 5 (consent required) + Art. 7 (consent not a precondition of service)"
     detect: "Consent input default-on (checked/defaultChecked/value=1)."
     fix_en: "Default consent inputs to unchecked; block processing when consent is false."
 

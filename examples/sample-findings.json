@@ -2,13 +2,13 @@
   "scan": {
     "tool": "pdpl-scanner",
     "version": "1.1.0",
-    "timestamp": "2026-06-30T00:00:00+00:00",
+    "timestamp": "2026-07-01T00:00:00+00:00",
     "target": "/path/to/sample_app",
     "files_scanned": 3,
     "regulation": "Saudi PDPL (Royal Decree M/19, amended by M/148) + Implementing Regulations + sector overlays",
-    "rules_last_updated": "2026-06-30",
+    "rules_last_updated": "2026-07-01",
     "rules_stale": false,
-    "freshness_note": "Compliance rules current as of 2026-06-30 (1 days ago). Saudi data-protection rules change; re-verify periodically."
+    "freshness_note": "Compliance rules current as of 2026-07-01 (0 days ago). Saudi data-protection rules change; re-verify periodically."
   },
   "entity": {
     "type": "financial",
@@ -101,7 +101,7 @@
       "domain": "Legal Basis & Consent",
       "title_en": "Pre-ticked / default-on consent",
       "title_ar": "خانة موافقة مفعّلة افتراضياً",
-      "pdpl_ref": "Art. 6 (free, affirmative consent)",
+      "pdpl_ref": "Art. 5 (consent required) + Art. 7 (consent not a precondition of service)",
       "severity": "high",
       "status": "fail",
       "confidence": "auto",
@@ -266,9 +266,9 @@
       "control": "NCA-ECC-01",
       "domain": "NCA-ECC overlay",
       "severity": "high",
-      "title_en": "Information hosting and storage inside the Kingdom (NCA ECC 4.2.3.3)",
-      "title_ar": "استضافة وتخزين المعلومات داخل المملكة (ضوابط الأمن السيبراني الأساسية 4.2.3.3)",
-      "pdpl_ref": "NCA Essential Cybersecurity Controls",
+      "title_en": "Information hosting and storage inside the Kingdom (NCA ECC-2:2024)",
+      "title_ar": "استضافة وتخزين المعلومات داخل المملكة (ضوابط الأمن السيبراني الأساسية ECC-2:2024)",
+      "pdpl_ref": "NCA Essential Cybersecurity Controls (ECC-2:2024)",
       "status": "manual",
       "confidence": "manual",
       "overlay": "NCA-ECC"

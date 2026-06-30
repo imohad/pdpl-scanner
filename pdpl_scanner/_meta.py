@@ -14,7 +14,7 @@ from datetime import date, datetime
 
 # Date the rules were last reviewed against the regulators' current published text.
 # Set to the repository's initial publish date. Bump this whenever you refresh the catalog.
-RULES_LAST_UPDATED = "2026-06-30"
+RULES_LAST_UPDATED = "2026-07-01"
 
 # Warn once the rules are older than this many days (regulation moves; re-verify).
 RULES_REVIEW_AFTER_DAYS = 180

@@ -8,5 +8,5 @@ Public API:
 from .entity_profiles import EntityProfile
 from .scanner import scan, ScanResult, Finding
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __all__ = ["scan", "ScanResult", "Finding", "EntityProfile", "__version__"]

@@ -291,6 +291,19 @@ def test_html_report_bilingual():
     assert "الملاحظات" in html   # Arabic findings heading
 
 
+def test_consent_control_cites_correct_pdpl_articles():
+    """Regression: affirmative-consent controls must cite Art. 5/7, never Art. 6.
+
+    Verified against SDAIA's published PDPL text (2026): Art. 5 governs consent (5(2) = withdrawal),
+    Art. 7 = consent not a precondition; Art. 6 is the OPPOSITE — the no-consent exceptions.
+    """
+    from pdpl_scanner.controls import CORE_CONTROLS
+    lb03 = CORE_CONTROLS["PDPL-LB-03"]["pdpl_ref"]
+    assert "Art. 5" in lb03 and "Art. 7" in lb03
+    assert "Art. 6" not in lb03                       # the historical mis-citation
+    assert "Art. 6" not in CORE_CONTROLS["PDPL-LB-03"]["pdpl_ref"]
+
+
 def test_yaml_mirror_in_sync_with_catalog():
     """Every control in controls.py must also appear in the human-readable YAML mirror (no drift)."""
     from pdpl_scanner.controls import CORE_CONTROLS, MANUAL_CONTROLS

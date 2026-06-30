@@ -17,13 +17,13 @@ from __future__ import annotations
 CORE_CONTROLS = {
     # --- Legal basis & consent ---
     "PDPL-LB-01": dict(domain="Legal Basis & Consent", severity="critical", mode="assisted",
-        pdpl_ref="Arts. 5-6 (lawful basis; consent default)",
+        pdpl_ref="Arts. 5–7 (lawful basis: consent Art. 5, non-consent bases Art. 6, no-precondition Art. 7)",
         title_en="Personal data written without a consent / legal-basis gate",
         title_ar="حفظ بيانات شخصية دون بوابة موافقة أو أساس نظامي",
         fix_en="Gate every personal-data write on a documented lawful basis; persist legal_basis, purpose, consent_timestamp, consent_version.",
         fix_ar="اربط كل حفظ لبيانات شخصية بأساس نظامي موثّق، واحفظ الأساس والغرض ووقت الموافقة ونسختها."),
     "PDPL-LB-03": dict(domain="Legal Basis & Consent", severity="high", mode="auto",
-        pdpl_ref="Art. 6 (free, affirmative consent)",
+        pdpl_ref="Art. 5 (consent required) + Art. 7 (consent not a precondition of service)",
         title_en="Pre-ticked / default-on consent",
         title_ar="خانة موافقة مفعّلة افتراضياً",
         fix_en="Default consent inputs to unchecked; block processing when consent is false.",

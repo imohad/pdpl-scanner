@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.1] - 2026
+Regulatory accuracy pass — PDPL article references independently verified against SDAIA's published
+text (multi-source, adversarially fact-checked).
+
+- **Fixed citation:** `PDPL-LB-03` cited *Art. 6* for affirmative consent — but Art. 6 is the
+  **no-consent exceptions** article. Corrected to **Art. 5** (consent) + **Art. 7** (consent not a
+  precondition). `PDPL-LB-01` clarified to **Arts. 5–7**.
+- **Fixed drift:** NCA ECC overlay updated from the retired ECC-1:2018 clause *4.2.3.3* → **ECC-2:2024**.
+- `docs/regulatory-references.md`: penalties pinned to **Art. 35 / Art. 36**; cross-border safeguards
+  trio (SCC / Binding Common Rules / Certificate) + transfer risk assessment + unpublished adequacy list.
+- New **[`docs/coverage-map.md`](docs/coverage-map.md)** — what PDPL requires vs. what the tool checks,
+  with verified refs and an explicit gap list. Linked from the README.
+- Verified-correct (unchanged): Arts. 4 & 9 (access), Arts. 4 & 18 (erasure), Art. 29 (cross-border),
+  Implementing Art. 24 (breach 72h), Art. 31 + Impl. 33 (RoPA). Regression test guards the consent ref.
+
 ## [1.1.0] - 2026
 Coverage, accuracy, and usability.
 
