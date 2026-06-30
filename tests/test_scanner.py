@@ -143,3 +143,159 @@ def test_freshness_helpers():
     soon = date(last.year, last.month, last.day)
     assert _meta.is_stale(soon) is False
     assert _meta.days_since_update(soon) == 0
+
+
+# --- v1.1: new detection rules ------------------------------------------------
+
+def _controls(res):
+    return {f.control for f in res.findings}
+
+
+def test_db_tls_disabled_detected(tmp_path):
+    (tmp_path / "config.toml").write_text('[db]\npassword = "s3cr3t-Live-99x"\nssl_mode = "disable"\n')
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    f = next(f for f in res.findings if f.control == "PDPL-SEC-02")
+    assert f.status == "fail" and f.severity == "high"
+
+
+def test_foreign_processor_detected_and_entity_aware(tmp_path):
+    (tmp_path / "track.js").write_text(
+        'fetch("https://api.mixpanel.com/track", { nationalId: user.nationalId })\n')
+    cb = lambda et: next(f for f in scan(str(tmp_path), EntityProfile(type=et)).findings
+                         if f.control == "PDPL-CB-02")
+    assert cb("financial").severity == "critical"      # prohibited-without-approval
+    assert cb("private_general").severity == "high"    # allowed-with-safeguards
+    assert cb("financial").note_ar                      # bilingual remediation present
+
+
+def test_foreign_processor_needs_pii_nearby(tmp_path):
+    # a bare dependency reference with no personal data nearby should not flag
+    (tmp_path / "pkg.txt").write_text("docs: see https://api.sendgrid.com for details\n")
+    res = scan(str(tmp_path), EntityProfile(type="financial"))
+    assert "PDPL-CB-02" not in _controls(res)
+
+
+# --- v1.1: secret triage ------------------------------------------------------
+
+def test_placeholder_secret_downgraded(tmp_path):
+    (tmp_path / "config.toml").write_text('password = "changeme"\n')
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    f = next(f for f in res.findings if f.control == "PDPL-SEC-03")
+    assert f.status == "warn" and f.severity == "medium"   # not a gate-blocking critical
+
+
+def test_real_secret_stays_critical(tmp_path):
+    (tmp_path / "config.py").write_text('aws_key = "AKIAIOSFODNN7EXAMPLE0"\n')
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    f = next(f for f in res.findings if f.control == "PDPL-SEC-03")
+    assert f.status == "fail" and f.severity == "critical"
+
+
+def test_placeholder_picks_right_value_on_multipair_line(tmp_path):
+    (tmp_path / "c.js").write_text('const o = { ssl_mode: "disable", password: "changeme" };\n')
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    sec3 = next(f for f in res.findings if f.control == "PDPL-SEC-03")
+    assert sec3.status == "warn"   # downgraded on "changeme", not misled by "disable"
+
+
+# --- v1.1: suppression --------------------------------------------------------
+
+def test_inline_ignore_all(tmp_path):
+    (tmp_path / "c.py").write_text('aws_key = "AKIAIOSFODNN7EXAMPLE0"  # pdpl-ignore\n')
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    assert "PDPL-SEC-03" not in _controls(res)
+
+
+def test_inline_ignore_specific_control(tmp_path):
+    (tmp_path / "c.py").write_text(
+        'aws_key = "AKIAIOSFODNN7EXAMPLE0"  # pdpl-ignore[PDPL-LOG-01]\n')
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    assert "PDPL-SEC-03" in _controls(res)   # not the suppressed one -> still fires
+
+
+def test_pdplignore_file(tmp_path):
+    (tmp_path / "secrets.py").write_text('aws_key = "AKIAIOSFODNN7EXAMPLE0"\n')
+    (tmp_path / ".pdplignore").write_text("# ignore generated\nsecrets.py\n")
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    assert "PDPL-SEC-03" not in _controls(res)
+
+
+def test_glob_exclude(tmp_path):
+    (tmp_path / "a.test.js").write_text('key = "AKIAIOSFODNN7EXAMPLE0"\n')
+    res = scan(str(tmp_path), EntityProfile(type="private_general"), exclude=["*.test.js"])
+    assert res.files_scanned == 0
+
+
+# --- v1.1: assisted controls --------------------------------------------------
+
+def test_assisted_soft_delete(tmp_path):
+    (tmp_path / "m.py").write_text("national_id = '1'\ndef remove(u):\n    u.is_deleted = True\n")
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    dsr2 = next(f for f in res.findings if f.control == "PDPL-DSR-02")
+    assert dsr2.status == "warn" and dsr2.confidence == "assisted" and dsr2.file
+
+
+def test_assisted_repo_level_absence(tmp_path):
+    (tmp_path / "a.py").write_text("national_id = ''\niqama = ''\n")
+    (tmp_path / "b.py").write_text("passport = ''\ndob = ''\n")
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    ctrls = _controls(res)
+    assert {"PDPL-DSR-01", "PDPL-RET-01", "PDPL-LB-01"} <= ctrls   # no export/retention/consent present
+
+
+def test_assisted_absence_silenced_when_handled(tmp_path):
+    (tmp_path / "a.py").write_text(
+        "national_id = ''\niqama = ''\nconsent = True\nexport_data()\nttl = 30  # retention\n")
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    ctrls = _controls(res)
+    assert "PDPL-DSR-01" not in ctrls and "PDPL-RET-01" not in ctrls and "PDPL-LB-01" not in ctrls
+
+
+def test_assisted_leads_do_not_fail_gate(tmp_path):
+    # personal data, no auto violations -> only assisted leads -> gate must still PASS
+    (tmp_path / "a.py").write_text(
+        "national_id = ''\niqama = ''\npassport = ''\nregion = 'me-central2'\n")
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    assert any(f.status == "warn" for f in res.findings)   # leads present
+    assert not any(f.status == "fail" for f in res.findings)
+    assert res.gate == "pass"
+
+
+# --- v1.1: passed controls + reports -----------------------------------------
+
+def test_passed_controls_reported(tmp_path):
+    (tmp_path / "ok.py").write_text("region = 'me-central2'\nstatus = 200\n")
+    res = scan(str(tmp_path), EntityProfile(type="private_general"))
+    assert "PDPL-SEC-03" in res.passed_controls and "PDPL-CB-01" in res.passed_controls
+    assert to_json(res)["passed_controls"]
+
+
+def test_sarif_has_partial_fingerprints():
+    res = scan(FIXTURE, EntityProfile(type="financial"))
+    s = to_sarif(res)
+    results = s["runs"][0]["results"]
+    assert results and all("partialFingerprints" in r for r in results)
+    # stable across two runs
+    s2 = to_sarif(scan(FIXTURE, EntityProfile(type="financial")))
+    fp1 = [r["partialFingerprints"] for r in results]
+    fp2 = [r["partialFingerprints"] for r in s2["runs"][0]["results"]]
+    assert fp1 == fp2
+
+
+def test_html_report_bilingual():
+    from pdpl_scanner.report import to_html
+    html = to_html(scan(FIXTURE, EntityProfile(type="financial")))
+    assert html.startswith("<!doctype html>")
+    assert 'class="rtl"' in html
+    assert "not a legal certification" in html
+    assert "الملاحظات" in html   # Arabic findings heading
+
+
+def test_yaml_mirror_in_sync_with_catalog():
+    """Every control in controls.py must also appear in the human-readable YAML mirror (no drift)."""
+    from pdpl_scanner.controls import CORE_CONTROLS, MANUAL_CONTROLS
+    yaml_path = os.path.join(os.path.dirname(__file__), "..", "controls", "pdpl-controls.yaml")
+    with open(yaml_path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    missing = [cid for cid in list(CORE_CONTROLS) + list(MANUAL_CONTROLS) if cid not in text]
+    assert not missing, f"controls missing from controls/pdpl-controls.yaml: {missing}"

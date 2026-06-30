@@ -1,14 +1,52 @@
 # PDPL Scanner
 
+[![CI](https://github.com/imohad/pdpl-scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/imohad/pdpl-scanner/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/pdpl-scanner.svg)](https://pypi.org/project/pdpl-scanner/)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 **Entity-aware compliance scanner for Saudi Arabia's Personal Data Protection Law (PDPL).**
 
 Drop it into any project's CI to scan code for PDPL violations and gate merges on them. It finds the issues a generic privacy linter misses, because Saudi compliance is not one rulebook: the hosting and residency rules and the regulator overlays change depending on *who the entity is* and *what data it handles*. A cross-border data flow that is merely "fix your safeguards" for a private SaaS is effectively **prohibited** for a SAMA-regulated bank or a government entity. This scanner knows the difference.
 
-> Built and maintained by [Mohammad AlShammari](https://www.linkedin.com/). PDPL = نظام حماية البيانات الشخصية. Output is bilingual (Arabic RTL + English).
+> Built and maintained by [Mohammad AlShammari](https://github.com/imohad). PDPL = نظام حماية البيانات الشخصية. Output is bilingual (Arabic RTL + English).
 
 > ⚠️ **This tool is an aid, not a legal certification and not a substitute for manual review.** A passing scan means the engineering layer is clean of what this tool checks, not that your organization is compliant. Always complete the manual-verify checklist and confirm with your DPO/legal. **Rules change** — the catalog is current as of the date in [`pdpl_scanner/_meta.py`](pdpl_scanner/_meta.py), shown in every report; re-verify periodically with `pdpl-scan update`. See [DISCLAIMER.md](DISCLAIMER.md). | **الأداة مساعِدة وليست شهادة امتثال ولا بديلاً عن التدقيق اليدوي. الأنظمة تتغيّر، فأعد التحقق دورياً.** التفاصيل في [DISCLAIMER.md](DISCLAIMER.md) والقسم العربي بالأسفل.
 
 **[العربية ↓](#نظرة-عامة-بالعربية)** — A full Arabic walkthrough is at the bottom of this file.
+
+---
+
+## Demo
+
+Scanning a small app as a **SAMA-regulated financial entity** (`pdpl-scan ./src --entity financial --show-pass`):
+
+```text
+PDPL scan — entity=financial class=confidential residency=prohibited_without_approval
+Files scanned: 3 | Score: 3/100 | Gate: FAIL
+Findings: critical=3 high=3 medium=1 | leads=2 | manual-verify=9
+  [CRITICAL] FAIL PDPL-CB-01   api.js:6        Personal data flows to a non-KSA region/endpoint
+  [CRITICAL] FAIL PDPL-SEC-03  api.js:7        Hardcoded secret / credential in source
+  [CRITICAL] FAIL PDPL-SEC-01  api.js:8        TLS verification disabled / plaintext transport
+  [HIGH    ] FAIL PDPL-LB-03   signup.jsx:1    Pre-ticked / default-on consent
+  [HIGH    ] FAIL PDPL-LOG-01  api.js:4        Personal/sensitive data written to logs
+  [HIGH    ] LEAD PDPL-DSR-01  (repo-wide)     No data-access / export path for data subjects
+  [MEDIUM  ] LEAD PDPL-RET-01  (repo-wide)     No retention limit / purge logic
+
+Auto-checks passed: PDPL-CB-02, PDPL-SEC-02, PDPL-SEC-05
+
+Manual-verify (confirm with DPO/legal):
+  [ ] SAMA-CLOUD-01  SAMA approval before cloud use / any cloud outside the Kingdom
+  [ ] SAMA-RESID-01  Highly sensitive financial data resides in-Kingdom + in-Kingdom key mgmt
+  [ ] NCA-ECC-01     Information hosting and storage inside the Kingdom (ECC 4.2.3.3)
+  ... +6 more
+```
+
+`FAIL` = confirmed auto finding (gates the build) · `LEAD` = high-recall assisted lead to triage.
+Run the same tree as `--entity private_general` and the cross-border verdict drops from *prohibited* to
+*allowed with safeguards*, and the SAMA/NCA obligations disappear. Add `--markdown report.md`,
+`--html report.html`, or `--sarif results.sarif` for shareable artifacts.
 
 ---
 
@@ -63,11 +101,25 @@ pdpl-scan .                         # scan using that config
 One-off without a config:
 
 ```bash
-pdpl-scan ./src --entity health --fail-on critical,high \
-  --json findings.json --sarif results.sarif --markdown report.md
+pdpl-scan ./src --entity health --fail-on critical,high --show-pass \
+  --json findings.json --sarif results.sarif --markdown report.md --html report.html
 ```
 
-Exit code is non-zero when the gate fails, so it blocks CI out of the box.
+Exit code is non-zero when the gate fails, so it blocks CI out of the box. `--html` writes a
+self-contained bilingual report you can hand to a DPO/legal; `--show-pass` also lists the auto controls
+that were evaluated and came back clean.
+
+### Option D — pre-commit
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/imohad/pdpl-scanner
+    rev: v1.1.0
+    hooks:
+      - id: pdpl-scan
+        args: [".", "--fail-on", "critical"]
+```
 
 ### Option C — as a library
 
@@ -110,16 +162,34 @@ The catalog maps each PDPL obligation to a detection mode. Highlights:
 
 | Domain | Example controls | Mode |
 |---|---|---|
-| Cross-border transfer | `PDPL-CB-01` data leaving KSA (entity-aware severity) | auto |
-| Security safeguards | `PDPL-SEC-01` TLS, `SEC-03` secrets, `SEC-05` hashing | auto |
+| Cross-border transfer | `PDPL-CB-01` data leaving KSA, `CB-02` foreign third-party processors (entity-aware severity) | auto |
+| Security safeguards | `PDPL-SEC-01` TLS off, `SEC-02` DB TLS disabled, `SEC-03` secrets, `SEC-05` hashing | auto |
 | Logging & exposure | `PDPL-LOG-01` personal data in logs | auto |
-| Legal basis & consent | `PDPL-LB-01` consent gate, `LB-03` pre-ticked consent | auto / assisted |
+| Legal basis & consent | `PDPL-LB-03` pre-ticked consent (auto), `LB-01` consent gate (assisted) | auto / assisted |
 | Data subject rights | `PDPL-DSR-01` access/export, `DSR-02` real erasure | assisted |
 | Sensitive data | `PDPL-SEN-01` elevated handling | assisted |
 | Retention | `PDPL-RET-01` retention limits | assisted |
 | Governance & records | `PDPL-GOV-02..07`, `BR-01` 72h breach | manual |
 
-`auto` controls produce real PASS/FAIL with file:line evidence. `assisted` controls produce high-recall leads best triaged by a human or the bundled Claude skill. `manual` controls are organizational obligations surfaced for sign-off. Full machine-readable catalog: [`controls/pdpl-controls.yaml`](controls/pdpl-controls.yaml). Human-readable: [`docs/controls-catalog.md`](docs/controls-catalog.md).
+`auto` controls produce a confirmed **FAIL** (gates the build) with file:line evidence. `assisted` controls produce high-recall **LEAD**s — a `WARN` that **never fails the gate on its own**, best triaged by a human or the bundled Claude skill. `manual` controls are organizational obligations surfaced for sign-off. Full machine-readable catalog: [`controls/pdpl-controls.yaml`](controls/pdpl-controls.yaml). Human-readable: [`docs/controls-catalog.md`](docs/controls-catalog.md).
+
+### Tuning the noise: suppression
+
+High-recall rules will surface leads you've already handled. Three ways to silence them:
+
+```python
+db_url = "postgres://app:pw@host/db"   # pdpl-ignore[PDPL-SEC-03]   ← one control on this line
+legacy_call()                          # pdpl-ignore                 ← all controls (covers the line below too)
+```
+
+```text
+# .pdplignore  (at the scan root, gitignore-style globs)
+tests/fixtures/**
+**/*.generated.*
+```
+
+…or `--exclude '<glob>'` (repeatable). Obvious placeholder/default secrets (`changeme`, `your_password`)
+are auto-downgraded to a medium lead so config templates don't fail the gate.
 
 ---
 
@@ -224,6 +294,11 @@ pdpl-scan update      # حالة حداثة القواعد وكيفية تحدي
 
 أو عبر GitHub Action: أضف الإجراء في `.github/workflows` فتظهر النتائج في تبويب الأمان وعلى طلبات الدمج،
 ويرسب البناء عند وجود مخالفة حرجة.
+
+**مخرجات وضبط الضجيج:** تنتج الأداة تقارير JSON وMarkdown وHTML (ثنائية اللغة) وSARIF. الملاحظات
+المؤكدة (`FAIL`) تكسر البوابة، أما الإشارات عالية الاسترجاع (`LEAD`) فلا تكسرها وحدها وتحتاج مراجعة بشرية.
+لإسكات ملاحظة عالجتها: أضف `# pdpl-ignore[PDPL-SEC-03]` في السطر، أو ملف `.pdplignore`، أو `--exclude`.
+وتُخفَّض الأسرار الافتراضية الواضحة (مثل `changeme`) تلقائياً إلى إشارة متوسطة بدل كسر البوابة.
 
 ### نوع الجهة يحدّد الحكم
 

@@ -1,14 +1,14 @@
 {
   "scan": {
     "tool": "pdpl-scanner",
-    "version": "1.0.0",
-    "timestamp": "2026-06-30T20:46:46.400784+00:00",
-    "target": "/home/claude/pdpl-scanner/tests/fixtures/sample_app",
+    "version": "1.1.0",
+    "timestamp": "2026-06-30T00:00:00+00:00",
+    "target": "/path/to/sample_app",
     "files_scanned": 3,
     "regulation": "Saudi PDPL (Royal Decree M/19, amended by M/148) + Implementing Regulations + sector overlays",
     "rules_last_updated": "2026-06-30",
     "rules_stale": false,
-    "freshness_note": "Compliance rules current as of 2026-06-30 (0 days ago). Saudi data-protection rules change; re-verify periodically."
+    "freshness_note": "Compliance rules current as of 2026-06-30 (1 days ago). Saudi data-protection rules change; re-verify periodically."
   },
   "entity": {
     "type": "financial",
@@ -23,16 +23,16 @@
     "dpia_required": false
   },
   "summary": {
-    "score": 5,
+    "score": 3,
     "gate": "fail",
-    "total_findings": 5,
+    "total_findings": 7,
     "fail": 5,
-    "warn": 0,
+    "warn": 2,
     "manual": 9,
     "by_severity": {
       "critical": 3,
-      "high": 2,
-      "medium": 0,
+      "high": 3,
+      "medium": 1,
       "low": 0
     }
   },
@@ -133,7 +133,40 @@
           "snippet": "console.log(\"login\", userNationalId, user.phone);   // PII in logs"
         }
       ]
+    },
+    {
+      "control": "PDPL-DSR-01",
+      "domain": "Data Subject Rights",
+      "title_en": "No data-access / export path for data subjects",
+      "title_ar": "لا توجد وسيلة وصول/تصدير لبيانات صاحب البيانات",
+      "pdpl_ref": "Arts. 4, 9 (access & portability)",
+      "severity": "high",
+      "status": "warn",
+      "confidence": "assisted",
+      "fix_en": "Add an authenticated self-service export returning the subject's data in JSON/CSV.",
+      "fix_ar": "أضف تصديراً ذاتياً موثّقاً يُرجع بيانات صاحب البيانات بصيغة قابلة للقراءة آلياً.",
+      "note": "No data-export / portability path was found anywhere in the codebase, yet personal data is handled. Add an authenticated self-service export (JSON/CSV).",
+      "note_ar": "لم يُعثر على وسيلة تصدير/نقل للبيانات رغم معالجة بيانات شخصية. أضف تصديراً ذاتياً موثّقاً."
+    },
+    {
+      "control": "PDPL-RET-01",
+      "domain": "Retention & Deletion",
+      "title_en": "No retention limit / purge logic on personal-data stores",
+      "title_ar": "لا توجد مدة احتفاظ أو حذف آلي لمخازن البيانات الشخصية",
+      "pdpl_ref": "Art. 18 (destroy when purpose ends)",
+      "severity": "medium",
+      "status": "warn",
+      "confidence": "assisted",
+      "fix_en": "Define a retention period per dataset and implement automated expiry/purge once the purpose ends.",
+      "fix_ar": "حدّد مدة احتفاظ لكل مجموعة بيانات، ونفّذ حذفاً آلياً عند انتهاء الغرض.",
+      "note": "No retention/expiry/purge logic was found, yet personal data is stored. Define a retention period per dataset and automate deletion when the purpose ends.",
+      "note_ar": "لم يُعثر على منطق احتفاظ/حذف آلي رغم تخزين بيانات شخصية. حدّد مدة احتفاظ ونفّذ حذفاً آلياً."
     }
+  ],
+  "passed_controls": [
+    "PDPL-CB-02",
+    "PDPL-SEC-02",
+    "PDPL-SEC-05"
   ],
   "manual_verify": [
     {

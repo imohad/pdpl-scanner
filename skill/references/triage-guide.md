@@ -26,15 +26,30 @@ CNI this is critical and the fix is "must reside in-Kingdom; obtain SAMA/regulat
 entities it is high and the fix is "lawful transfer basis + SCCs/adequacy/exception + transfer risk
 assessment + minimization."
 
+### PDPL-CB-02 — foreign third-party processor (assisted-leaning auto)
+Confirm when personal data is sent to a known foreign processor endpoint (analytics, email, CRM, AI,
+observability, payments: mixpanel/segment/sendgrid/twilio/openai/stripe/datadog…). Even "anonymous"
+analytics usually carries device/IP/identifier data, so default to confirm when a PII payload is nearby.
+**Dismiss** a bare dependency reference or doc link with no personal data. Same entity-aware framing as
+CB-01: for a bank/government this is critical (treat the SaaS as a cross-border transfer needing approval
++ a DPA); for private entities it's high (lawful basis + DPA + minimization). Prefer an in-Kingdom or
+adequacy-listed alternative.
+
 ### PDPL-SEC-03 — hardcoded secret
 Confirm on real literals: AWS keys (`AKIA…`), private-key blocks, credentialed connection strings, or an
-assignment of a long literal to a secret-named variable. **Dismiss** placeholders (`"changeme"`,
-`process.env.X`, `${SECRET}`), obvious test fixtures, and variable *names* with no literal value. Any
-confirmed secret = rotate immediately, not just relocate.
+assignment of a long literal to a secret-named variable. The scanner now **auto-downgrades obvious
+placeholders** (`changeme`, `your_password`, low-entropy/templated values) to a medium LEAD — keep those
+as "verify + don't ship the default," not a critical. **Dismiss** `process.env.X` / `${SECRET}` and
+variable *names* with no literal value. Any confirmed live secret = rotate immediately, not just relocate.
 
 ### PDPL-SEC-01 — transport security
 Confirm `verify=False`, `rejectUnauthorized: false`, `InsecureSkipVerify: true`, or `http://` carrying
 personal data. **Dismiss** localhost/dev URLs and health-check pings with no personal data.
+
+### PDPL-SEC-02 — database/transport TLS disabled
+Confirm `sslmode=disable`, `ssl_mode="disable"`, or `ssl: false` on a connection that carries personal
+data between services (app↔DB, app↔broker). **Dismiss** local-dev compose files clearly scoped to
+localhost. Fix is `sslmode=require`/`verify-full` (or mTLS).
 
 ### PDPL-LOG-01 — personal data in logs
 The highest false-positive control. Confirm only when the logged expression actually contains a personal
@@ -45,10 +60,18 @@ value or sensitive field, not merely a nearby variable. A `logger.info("request 
 Confirm a consent/opt-in input defaulted to checked/true. **Dismiss** non-consent toggles (dark mode,
 remember-me) that merely matched on "checked".
 
+### PDPL-LB-01 — consent / lawful-basis gate (assisted, repo-wide)
+The CLI now emits this as a repo-wide LEAD when personal data is handled but no consent/legal-basis signal
+(`consent`, `legal_basis`, `opt-in`, الموافقة) appears anywhere. Confirm when writes genuinely lack a
+documented basis; **dismiss** when basis is enforced elsewhere (middleware, a policy layer, server-side
+checks the scanner can't see). Frame as "gate writes on a documented lawful basis; persist basis/purpose/
+consent metadata."
+
 ### PDPL-DSR-01 / DSR-02 — access & erasure (assisted)
-These are about absence. Look for an export/portability path (`/me/data`, `download-data`) and for real
-deletion vs `is_deleted`/`deleted_at` soft flags. If erasure is soft-only with no purge/anonymization and
-no documented lawful-retention exception, confirm. Frame as "add a hard-delete/anonymization path."
+These are about absence. The CLI emits DSR-01 repo-wide when no export/portability path (`/me/data`,
+`download-data`) exists, and DSR-02 per soft-delete flag (`is_deleted`/`deleted_at`). If erasure is
+soft-only with no purge/anonymization and no documented lawful-retention exception, confirm. Frame as
+"add a hard-delete/anonymization path."
 
 ### PDPL-SEN-01 — sensitive data (assisted)
 Confirm sensitive fields without encryption/least-privilege/minimization. Recommend a DPIA when the

@@ -162,6 +162,9 @@ def cmd_scan(args) -> int:
     if args.markdown:
         with open(args.markdown, "w", encoding="utf-8") as fh:
             fh.write(RPT.to_markdown(res))
+    if args.html:
+        with open(args.html, "w", encoding="utf-8") as fh:
+            fh.write(RPT.to_html(res))
 
     # stdout
     if fmt == "json":
@@ -169,28 +172,33 @@ def cmd_scan(args) -> int:
     elif fmt == "markdown":
         print(RPT.to_markdown(res))
     else:
-        _print_summary(res)
+        _print_summary(res, show_pass=args.show_pass)
 
     return 1 if res.gate == "fail" else 0
 
 
-def _print_summary(res) -> None:
+def _print_summary(res, show_pass: bool = False) -> None:
     gate = "FAIL" if res.gate == "fail" else "PASS"
     bs = res.by_severity
+    n_lead = sum(1 for f in res.findings if f.status == "warn")
     print(f"\nPDPL scan — entity={res.profile.type} class={res.profile.data_classification} "
           f"residency={res.profile.residency}")
     print(f"Files scanned: {res.files_scanned} | Score: {res.score}/100 | Gate: {gate}")
     print(f"Findings: critical={bs.get('critical',0)} high={bs.get('high',0)} "
-          f"medium={bs.get('medium',0)} | manual-verify={len(res.manual)}")
+          f"medium={bs.get('medium',0)} | leads={n_lead} | manual-verify={len(res.manual)}")
     if _meta.is_stale():
         print(f"  ! Rules last reviewed {_meta.RULES_LAST_UPDATED} and are overdue. "
               f"Run `pdpl-scan update`.")
     for f in res.findings[:20]:
         d = f.to_dict()
-        mark = "FAIL" if f.status == "fail" else "WARN"
-        print(f"  [{f.severity.upper():8}] {mark} {f.control:12} {f.file}:{f.line}  {d['title_en']}")
+        mark = "FAIL" if f.status == "fail" else "LEAD"
+        where = f"{f.file}:{f.line}" if f.file else "(repo-wide)"
+        print(f"  [{f.severity.upper():8}] {mark} {f.control:12} {where:24}  {d['title_en']}")
     if len(res.findings) > 20:
         print(f"  ... +{len(res.findings)-20} more")
+    if show_pass and res.passed_controls:
+        print("\nAuto-checks passed (evaluated, no violation):")
+        print("  " + ", ".join(res.passed_controls))
     if res.manual:
         print("\nManual-verify (confirm with DPO/legal):")
         for m in res.manual:
@@ -220,12 +228,16 @@ def _add_scan_args(ap: argparse.ArgumentParser) -> None:
                     help="Entity type override (government|financial|health|telecom|"
                          "cloud_provider|critical_infrastructure|private_general|nonprofit)")
     ap.add_argument("--fail-on", help="Comma list of severities that fail the gate (default: critical)")
-    ap.add_argument("--exclude", action="append", help="Path segment to exclude (repeatable)")
+    ap.add_argument("--exclude", action="append",
+                    help="Path segment or glob to exclude (repeatable). Also reads ./.pdplignore")
     ap.add_argument("--format", choices=["summary", "json", "markdown"], default="summary",
                     help="stdout format")
+    ap.add_argument("--show-pass", action="store_true",
+                    help="Also list auto controls that were evaluated and found clean")
     ap.add_argument("--json", help="Write JSON findings to this path")
     ap.add_argument("--sarif", help="Write SARIF (for GitHub code scanning) to this path")
     ap.add_argument("--markdown", help="Write bilingual markdown report to this path")
+    ap.add_argument("--html", help="Write standalone bilingual HTML report to this path")
 
 
 def main(argv=None) -> int:

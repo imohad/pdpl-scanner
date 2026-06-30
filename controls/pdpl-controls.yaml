@@ -51,6 +51,14 @@ controls:
     detect: "Personal-data payload reaching a non-KSA region/endpoint."
     fix_en: "Confirm a lawful transfer basis + safeguard (SCCs/adequacy/exception), run a transfer risk assessment, minimize the payload, prefer in-Kingdom hosting. For government/financial/CNI entities cross-border is effectively prohibited without regulator approval."
 
+  - id: PDPL-CB-02
+    domain: Cross-Border Transfer
+    severity: critical   # runtime severity is set by entity profile
+    mode: auto
+    pdpl_ref: "Art. 29 + Transfer Regulations (processors abroad)"
+    detect: "Personal data sent to a known foreign third-party processor endpoint (analytics, email, CRM, AI, observability, payments) — e.g. mixpanel, segment, sendgrid, twilio, openai, stripe, datadog."
+    fix_en: "Treat third-party SaaS that receives personal data as a cross-border transfer: confirm a lawful basis + safeguard, sign a DPA, minimize/anonymize the payload, prefer an in-Kingdom or adequacy-listed provider."
+
   - id: PDPL-SEC-01
     domain: Security Safeguards
     severity: critical
@@ -58,6 +66,14 @@ controls:
     pdpl_ref: "Art. 19 (technical & organizational measures)"
     detect: "TLS verification disabled, plaintext http:// with PII, or TLS < 1.2."
     fix_en: "Enforce TLS 1.2+ on every channel carrying personal data; never disable certificate verification."
+
+  - id: PDPL-SEC-02
+    domain: Security Safeguards
+    severity: high
+    mode: auto
+    pdpl_ref: "Art. 19 (encryption in transit)"
+    detect: "Database/service TLS disabled (sslmode=disable, ssl_mode=\"disable\", ssl=false)."
+    fix_en: "Enable TLS on the database/service connection (sslmode=require/verify-full) so personal data is not carried in plaintext between services."
 
   - id: PDPL-SEC-03
     domain: Security Safeguards
