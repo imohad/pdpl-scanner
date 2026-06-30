@@ -30,7 +30,7 @@ This is an **engineering-layer** scanner. It is **not a legal certification of P
 
 ### Option A — GitHub Action (recommended)
 
-Add `.github/workflows/pdpl-scan.yml`:
+Add `.github/workflows/pdpl-scan.yml` (a ready-to-copy version is in [`examples/pdpl-scan.yml`](examples/pdpl-scan.yml)):
 
 ```yaml
 name: PDPL Compliance
