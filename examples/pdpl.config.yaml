@@ -1,0 +1,17 @@
+# Example: a SAMA-regulated fintech handling sensitive customer data with cross-border vendors.
+entity:
+  type: financial
+  data_classification: confidential
+  is_public_entity: false
+  is_foreign_entity: false
+  processes_sensitive_data: true
+  processes_children_data: false
+  cross_border_transfers: true
+  large_scale_processing: true
+  uses_ai_on_personal_data: false
+scan:
+  paths: ["src", "services", "config"]
+  exclude: ["tests", "node_modules", "dist", "build", ".terraform"]
+gate:
+  fail_on: [critical]
+  weights: { critical: 25, high: 10, medium: 4, low: 1 }

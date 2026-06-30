@@ -1,0 +1,130 @@
+# PDPL control catalog (human-readable mirror of pdpl_scanner/controls.py).
+# Edit here to customize, then keep the Python source of truth in sync.
+# mode: auto (deterministic PASS/FAIL) | assisted (high-recall lead) | manual (organizational, verify by hand)
+
+meta:
+  regulation: "Saudi PDPL (Royal Decree M/19, amended by M/148) + Implementing Regulations + Transfer Regulations"
+  authority: "SDAIA (Saudi Data & AI Authority)"
+  note: "Article references are a working map, not legal advice. Verify against SDAIA's current regulations."
+
+severity_weights: { critical: 25, high: 10, medium: 4, low: 1 }
+gate: { fail_on: [critical], or_high_fails_at_least: 2 }
+
+controls:
+  - id: PDPL-LB-01
+    domain: Legal Basis & Consent
+    severity: critical
+    mode: assisted
+    pdpl_ref: "Arts. 5-6 (lawful basis; consent default)"
+    detect: "Personal-data write with no preceding consent/legal-basis gate."
+    fix_en: "Gate every personal-data write on a documented lawful basis; persist legal_basis, purpose, consent_timestamp, consent_version."
+
+  - id: PDPL-LB-03
+    domain: Legal Basis & Consent
+    severity: high
+    mode: auto
+    pdpl_ref: "Art. 6 (free, affirmative consent)"
+    detect: "Consent input default-on (checked/defaultChecked/value=1)."
+    fix_en: "Default consent inputs to unchecked; block processing when consent is false."
+
+  - id: PDPL-DSR-01
+    domain: Data Subject Rights
+    severity: high
+    mode: assisted
+    pdpl_ref: "Arts. 4, 9 (access & portability)"
+    detect: "No access/export path for data subjects in a PII app."
+    fix_en: "Add an authenticated self-service export returning the subject's data in JSON/CSV."
+
+  - id: PDPL-DSR-02
+    domain: Data Subject Rights
+    severity: high
+    mode: assisted
+    pdpl_ref: "Arts. 4, 18 (erasure)"
+    detect: "Soft-delete-only (is_deleted/deleted_at) with no purge or anonymization."
+    fix_en: "Implement hard delete or irreversible anonymization across stores, caches, and backups policy."
+
+  - id: PDPL-CB-01
+    domain: Cross-Border Transfer
+    severity: critical   # runtime severity is set by entity profile
+    mode: auto
+    pdpl_ref: "Art. 29 + Transfer Regulations + Risk Assessment Guideline"
+    detect: "Personal-data payload reaching a non-KSA region/endpoint."
+    fix_en: "Confirm a lawful transfer basis + safeguard (SCCs/adequacy/exception), run a transfer risk assessment, minimize the payload, prefer in-Kingdom hosting. For government/financial/CNI entities cross-border is effectively prohibited without regulator approval."
+
+  - id: PDPL-SEC-01
+    domain: Security Safeguards
+    severity: critical
+    mode: auto
+    pdpl_ref: "Art. 19 (technical & organizational measures)"
+    detect: "TLS verification disabled, plaintext http:// with PII, or TLS < 1.2."
+    fix_en: "Enforce TLS 1.2+ on every channel carrying personal data; never disable certificate verification."
+
+  - id: PDPL-SEC-03
+    domain: Security Safeguards
+    severity: critical
+    mode: auto
+    pdpl_ref: "Art. 19"
+    detect: "Hardcoded API key, password, private key, or credentialed connection string."
+    fix_en: "Move secrets to a managed secret store / env injection; rotate any exposed credential immediately."
+
+  - id: PDPL-SEC-05
+    domain: Security Safeguards
+    severity: high
+    mode: auto
+    pdpl_ref: "Art. 19"
+    detect: "Passwords hashed with MD5/SHA1 or stored plaintext."
+    fix_en: "Use bcrypt/scrypt/argon2 with a per-user salt."
+
+  - id: PDPL-LOG-01
+    domain: Logging & Exposure
+    severity: high
+    mode: auto
+    pdpl_ref: "Art. 19 + minimization"
+    detect: "Logger/print call emitting personal or sensitive field names/values."
+    fix_en: "Redact/mask personal data in logs; never log secrets or sensitive identifiers; scrub error payloads."
+
+  - id: PDPL-SEN-01
+    domain: Sensitive Personal Data
+    severity: critical
+    mode: assisted
+    pdpl_ref: "Art. 1 (definition) + elevated safeguards"
+    detect: "Sensitive fields (health, biometric, genetic, credit, criminal) without elevated controls."
+    fix_en: "Apply encryption, least-privilege access, minimization, and a documented transfer basis; trigger a DPIA for large-scale/high-risk processing."
+
+  - id: PDPL-RET-01
+    domain: Retention & Deletion
+    severity: medium
+    mode: assisted
+    pdpl_ref: "Art. 18 (destroy when purpose ends)"
+    detect: "Personal-data store with no TTL/retention/purge logic."
+    fix_en: "Define a retention period per dataset and implement automated expiry/purge once the purpose ends."
+
+manual_controls:
+  - id: PDPL-GOV-02
+    title: "Record of Processing Activities (RoPA) maintained and retained"
+    pdpl_ref: "Art. 31 + RoPA Guideline"
+  - id: PDPL-GOV-03
+    title: "Controller registration on the National Data Governance Platform"
+    pdpl_ref: "Controller registration rules"
+    trigger: "public entity, primary processing, sensitive data, cross-border, or data of those lacking legal capacity"
+  - id: PDPL-GOV-04
+    title: "DPO appointed and registered where required"
+    pdpl_ref: "DPO appointment rules"
+    trigger: "public entity, large-scale sensitive processing, cross-border, or children/vulnerable data"
+  - id: PDPL-GOV-05
+    title: "Processor agreements (DPAs) with breach, deletion, and audit terms"
+    pdpl_ref: "Controller-processor obligations"
+  - id: PDPL-GOV-06
+    title: "DPIA for high-risk / large-scale / sensitive processing"
+    pdpl_ref: "Implementing Regs (impact assessment)"
+  - id: PDPL-GOV-07
+    title: "Privacy notice present, accessible, and complete at collection"
+    pdpl_ref: "Art. 12 (transparency)"
+  - id: PDPL-BR-01
+    title: "72-hour breach notification runbook to SDAIA"
+    pdpl_ref: "Art. 20 + Art. 24 Implementing Regs + Breach Procedural Guide"
+    note: "No materiality threshold; notify SDAIA within 72 hours of awareness; notify affected subjects where harm is likely."
+
+# Sector overlays add manual controls based on entity type (see pdpl_scanner/entity_profiles.py):
+#   NDMO (data classification), NCA-ECC / NCA-CCC (in-Kingdom hosting), SAMA (cloud approval + residency),
+#   CST-CCRF (cloud levels), MOH-HEALTH / SFDA-AI (health), SDAIA-AI (AI Adoption Framework).

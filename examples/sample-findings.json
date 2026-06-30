@@ -1,0 +1,245 @@
+{
+  "scan": {
+    "tool": "pdpl-scanner",
+    "version": "1.0.0",
+    "timestamp": "2026-06-30T20:46:46.400784+00:00",
+    "target": "/home/claude/pdpl-scanner/tests/fixtures/sample_app",
+    "files_scanned": 3,
+    "regulation": "Saudi PDPL (Royal Decree M/19, amended by M/148) + Implementing Regulations + sector overlays",
+    "rules_last_updated": "2026-06-30",
+    "rules_stale": false,
+    "freshness_note": "Compliance rules current as of 2026-06-30 (0 days ago). Saudi data-protection rules change; re-verify periodically."
+  },
+  "entity": {
+    "type": "financial",
+    "data_classification": "confidential",
+    "residency_posture": "prohibited_without_approval",
+    "overlays": [
+      "SAMA",
+      "NCA-ECC"
+    ],
+    "dpo_required": true,
+    "registration_required": false,
+    "dpia_required": false
+  },
+  "summary": {
+    "score": 5,
+    "gate": "fail",
+    "total_findings": 5,
+    "fail": 5,
+    "warn": 0,
+    "manual": 9,
+    "by_severity": {
+      "critical": 3,
+      "high": 2,
+      "medium": 0,
+      "low": 0
+    }
+  },
+  "findings": [
+    {
+      "control": "PDPL-CB-01",
+      "domain": "Cross-Border Transfer",
+      "title_en": "Personal data flows to a non-KSA region/endpoint",
+      "title_ar": "تدفّق بيانات شخصية إلى منطقة/وجهة خارج المملكة",
+      "pdpl_ref": "Art. 29 + Transfer Regulations + Risk Assessment Guideline",
+      "severity": "critical",
+      "status": "fail",
+      "confidence": "auto",
+      "fix_en": "Confirm a lawful transfer basis + safeguard (SCCs/adequacy/exception), run a transfer risk assessment, minimize the payload, prefer in-Kingdom hosting.",
+      "fix_ar": "تأكد من أساس نقل وضمانة (بنود تعاقدية معيارية/كفاية/استثناء)، نفّذ تقييم مخاطر نقل، قلّل الحمولة، وفضّل الاستضافة داخل المملكة.",
+      "evidence": [
+        {
+          "file": "api.js",
+          "line": 6,
+          "snippet": "const config = { region: 'eu-west-1', db: 'patient_records' };  // cross-border"
+        }
+      ],
+      "note": "This data must remain in-Kingdom. Cross-border requires the competent regulator's approval (SAMA for financial entities / NDMO classification for government). Host in-Kingdom with a licensed provider.",
+      "note_ar": "هذه البيانات يجب أن تبقى داخل المملكة. النقل خارجها يتطلب موافقة الجهة الرقابية المختصة (ساما للجهات المالية / تصنيف NDMO للجهات الحكومية). استضف داخل المملكة لدى مزوّد مرخّص."
+    },
+    {
+      "control": "PDPL-SEC-03",
+      "domain": "Security Safeguards",
+      "title_en": "Hardcoded secret / credential in source",
+      "title_ar": "سر أو بيانات اعتماد مضمّنة في الكود",
+      "pdpl_ref": "Art. 19 (safeguards against unauthorized access)",
+      "severity": "critical",
+      "status": "fail",
+      "confidence": "auto",
+      "fix_en": "Move secrets to a managed secret store / env injection; rotate any exposed credential immediately.",
+      "fix_ar": "انقل الأسرار إلى مخزن أسرار مُدار/حقن بيئة، وبدّل أي بيانات اعتماد مكشوفة فوراً.",
+      "evidence": [
+        {
+          "file": "api.js",
+          "line": 7,
+          "snippet": "const apiKey = \"sk_live_abc123def456ghijklmnop\";    // hardcoded secret"
+        }
+      ]
+    },
+    {
+      "control": "PDPL-SEC-01",
+      "domain": "Security Safeguards",
+      "title_en": "TLS verification disabled / plaintext transport of personal data",
+      "title_ar": "تعطيل التحقق من TLS أو نقل بيانات شخصية بدون تشفير",
+      "pdpl_ref": "Art. 19 (technical & organizational measures)",
+      "severity": "critical",
+      "status": "fail",
+      "confidence": "auto",
+      "fix_en": "Enforce TLS 1.2+ on every channel carrying personal data; never disable certificate verification.",
+      "fix_ar": "افرض TLS 1.2 فأعلى على كل قناة تحمل بيانات شخصية، ولا تعطّل التحقق من الشهادات.",
+      "evidence": [
+        {
+          "file": "api.js",
+          "line": 8,
+          "snippet": "axios.get(url, { httpsAgent: new https.Agent({ rejectUnauthorized: false }) });"
+        }
+      ]
+    },
+    {
+      "control": "PDPL-LB-03",
+      "domain": "Legal Basis & Consent",
+      "title_en": "Pre-ticked / default-on consent",
+      "title_ar": "خانة موافقة مفعّلة افتراضياً",
+      "pdpl_ref": "Art. 6 (free, affirmative consent)",
+      "severity": "high",
+      "status": "fail",
+      "confidence": "auto",
+      "fix_en": "Default consent inputs to unchecked; block processing when consent is false.",
+      "fix_ar": "اجعل خانات الموافقة غير مفعّلة افتراضياً، وامنع المعالجة عند رفض الموافقة.",
+      "evidence": [
+        {
+          "file": "signup.jsx",
+          "line": 1,
+          "snippet": "<input type=\"checkbox\" name=\"consent\" defaultChecked={true} />"
+        }
+      ]
+    },
+    {
+      "control": "PDPL-LOG-01",
+      "domain": "Logging & Exposure",
+      "title_en": "Personal/sensitive data written to logs",
+      "title_ar": "تسجيل بيانات شخصية/حساسة في السجلات",
+      "pdpl_ref": "Art. 19 + minimization",
+      "severity": "high",
+      "status": "fail",
+      "confidence": "auto",
+      "fix_en": "Redact/mask personal data in logs; never log secrets or sensitive identifiers; scrub error payloads.",
+      "fix_ar": "أخفِ/قنّع البيانات الشخصية في السجلات، ولا تسجّل الأسرار أو المعرفات الحساسة، ونظّف رسائل الأخطاء.",
+      "evidence": [
+        {
+          "file": "api.js",
+          "line": 4,
+          "snippet": "console.log(\"login\", userNationalId, user.phone);   // PII in logs"
+        }
+      ]
+    }
+  ],
+  "manual_verify": [
+    {
+      "control": "PDPL-GOV-02",
+      "domain": "Governance & Records",
+      "severity": "medium",
+      "title_en": "Record of Processing Activities (RoPA) maintained and retained",
+      "title_ar": "سجل أنشطة المعالجة محفوظ ومحدّث",
+      "pdpl_ref": "Art. 31 + RoPA Guideline",
+      "status": "manual",
+      "confidence": "manual",
+      "note_en": "RoPA covers purposes, data categories, recipients, cross-border arrangements, retention, and security measures; produced to SDAIA on request.",
+      "note_ar": "يشمل السجل الأغراض وفئات البيانات والمستلمين وترتيبات النقل والاحتفاظ والتدابير الأمنية."
+    },
+    {
+      "control": "PDPL-GOV-07",
+      "domain": "Transparency",
+      "severity": "medium",
+      "title_en": "Privacy notice present, accessible, and complete at the point of collection",
+      "title_ar": "إشعار خصوصية واضح ومتاح وكامل عند جمع البيانات",
+      "pdpl_ref": "Art. 12 (transparency at collection)",
+      "status": "manual",
+      "confidence": "manual",
+      "note_en": "States purpose, legal basis, recipients, transfers, retention, and data-subject rights.",
+      "note_ar": "يوضّح الغرض والأساس والمستلمين والنقل والاحتفاظ وحقوق صاحب البيانات."
+    },
+    {
+      "control": "PDPL-BR-01",
+      "domain": "Breach Notification",
+      "severity": "high",
+      "title_en": "72-hour breach notification runbook to SDAIA (and affected subjects where harm is likely)",
+      "title_ar": "إجراء التبليغ عن الاختراق خلال ٧٢ ساعة لسدايا (وأصحاب البيانات عند احتمال الضرر)",
+      "pdpl_ref": "Art. 20 + Art. 24 Implementing Regs + Breach Procedural Guide",
+      "status": "manual",
+      "confidence": "manual",
+      "note_en": "No materiality threshold: notify SDAIA within 72 hours of awareness, with details and mitigations.",
+      "note_ar": "لا يوجد حد أدنى: بلّغ سدايا خلال ٧٢ ساعة من العلم مع التفاصيل والتدابير."
+    },
+    {
+      "control": "PDPL-GOV-05",
+      "domain": "Governance & Records",
+      "severity": "medium",
+      "title_en": "Processor agreements (DPAs) in place with breach, deletion, and audit terms",
+      "title_ar": "اتفاقيات معالجة مع المعالجين تتضمن الاختراق والحذف والتدقيق",
+      "pdpl_ref": "Controller-processor obligations",
+      "status": "manual",
+      "confidence": "manual",
+      "note_en": "Controllers remain liable for processors; contracts must reflect breach notice and sub-processing controls.",
+      "note_ar": "تبقى مسؤولية جهة التحكم قائمة، وتعكس العقود التبليغ عن الاختراق وضوابط المعالجة الفرعية."
+    },
+    {
+      "control": "PDPL-GOV-04",
+      "domain": "Governance & Records",
+      "severity": "medium",
+      "title_en": "Data Protection Officer appointed and registered where required",
+      "title_ar": "تعيين مسؤول حماية البيانات وتسجيله عند اللزوم",
+      "pdpl_ref": "DPO appointment rules",
+      "status": "manual",
+      "confidence": "manual",
+      "note_en": "Required for public entities, large-scale sensitive processing, cross-border, or processing children/vulnerable data.",
+      "note_ar": "مطلوب للجهات العامة والمعالجة الحساسة واسعة النطاق والنقل الخارجي وبيانات الأطفال."
+    },
+    {
+      "control": "SAMA-CLOUD-01",
+      "domain": "SAMA overlay",
+      "severity": "critical",
+      "title_en": "SAMA approval obtained before using cloud services; explicit approval for any cloud outside the Kingdom",
+      "title_ar": "الحصول على موافقة ساما قبل استخدام الخدمات السحابية، وموافقة صريحة لأي سحابة خارج المملكة",
+      "pdpl_ref": "SAMA Cloud Computing Regulatory Framework",
+      "status": "manual",
+      "confidence": "manual",
+      "overlay": "SAMA"
+    },
+    {
+      "control": "SAMA-RESID-01",
+      "domain": "SAMA overlay",
+      "severity": "critical",
+      "title_en": "Highly sensitive customer/financial data resides in-Kingdom with in-Kingdom key management",
+      "title_ar": "بقاء بيانات العملاء/المالية الحساسة داخل المملكة مع إدارة مفاتيح داخل المملكة",
+      "pdpl_ref": "SAMA CCRF / Cyber Security Framework",
+      "status": "manual",
+      "confidence": "manual",
+      "overlay": "SAMA"
+    },
+    {
+      "control": "SAMA-OUT-01",
+      "domain": "SAMA overlay",
+      "severity": "high",
+      "title_en": "Material outsourcing register maintained; SAMA no-objection for material outsourcing abroad",
+      "title_ar": "سجل إسناد جوهري، وعدم ممانعة من ساما للإسناد الجوهري للخارج",
+      "pdpl_ref": "SAMA Rules on Outsourcing",
+      "status": "manual",
+      "confidence": "manual",
+      "overlay": "SAMA"
+    },
+    {
+      "control": "NCA-ECC-01",
+      "domain": "NCA-ECC overlay",
+      "severity": "high",
+      "title_en": "Information hosting and storage inside the Kingdom (NCA ECC 4.2.3.3)",
+      "title_ar": "استضافة وتخزين المعلومات داخل المملكة (ضوابط الأمن السيبراني الأساسية 4.2.3.3)",
+      "pdpl_ref": "NCA Essential Cybersecurity Controls",
+      "status": "manual",
+      "confidence": "manual",
+      "overlay": "NCA-ECC"
+    }
+  ],
+  "note": "Engineering-layer scan. Not a legal certification. Manual-verify controls are real obligations to confirm with your DPO/legal."
+}

@@ -1,0 +1,29 @@
+# Copy this into your own repo at .github/workflows/pdpl-scan.yml
+# It runs the PDPL compliance scan on every push and pull request, fails the build on
+# critical findings, and publishes results to the GitHub Security tab.
+
+name: PDPL Compliance
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF to code scanning
+
+jobs:
+  pdpl-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PDPL Compliance Scan
+        uses: imohad/pdpl-scanner@v1
+        with:
+          path: "."
+          # Either commit a pdpl.config.yaml (run `pdpl-scan init`) or set the entity here:
+          entity: "private_general"   # government | financial | health | telecom | private_general | ...
+          fail-on: "critical"
+          upload-sarif: "true"

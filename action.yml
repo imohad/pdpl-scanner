@@ -1,0 +1,91 @@
+name: "PDPL Compliance Scan"
+description: "Scan your codebase for Saudi PDPL compliance and gate merges on violations. Entity-aware (government, financial, health, ...)."
+author: "Mohammad AlShammari"
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  path:
+    description: "Path to scan"
+    required: false
+    default: "."
+  entity:
+    description: "Entity type (government|financial|health|telecom|cloud_provider|critical_infrastructure|private_general|nonprofit). Ignored if pdpl.config.yaml is present."
+    required: false
+    default: "private_general"
+  config:
+    description: "Path to pdpl.config.yaml"
+    required: false
+    default: "pdpl.config.yaml"
+  fail-on:
+    description: "Comma-separated severities that fail the build (default: critical)"
+    required: false
+    default: "critical"
+  upload-sarif:
+    description: "Upload SARIF to GitHub code scanning (shows findings on the Security tab and inline on PRs)"
+    required: false
+    default: "true"
+
+outputs:
+  gate:
+    description: "pass or fail"
+    value: ${{ steps.scan.outputs.gate }}
+  score:
+    description: "Compliance score out of 100"
+    value: ${{ steps.scan.outputs.score }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+
+    - name: Install pdpl-scanner
+      shell: bash
+      run: pip install "${{ github.action_path }}"
+
+    - name: Run PDPL scan
+      id: scan
+      shell: bash
+      run: |
+        set +e
+        CONFIG_ARG=""
+        if [ -f "${{ inputs.config }}" ]; then CONFIG_ARG="--config ${{ inputs.config }}"; fi
+        pdpl-scan "${{ inputs.path }}" \
+          $CONFIG_ARG \
+          --entity "${{ inputs.entity }}" \
+          --fail-on "${{ inputs.fail-on }}" \
+          --json pdpl-findings.json \
+          --sarif pdpl-results.sarif \
+          --markdown pdpl-report.md
+        CODE=$?
+        GATE=$(python -c "import json;print(json.load(open('pdpl-findings.json'))['summary']['gate'])")
+        SCORE=$(python -c "import json;print(json.load(open('pdpl-findings.json'))['summary']['score'])")
+        echo "gate=$GATE" >> "$GITHUB_OUTPUT"
+        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+        {
+          echo "## PDPL Compliance Scan"
+          echo ""
+          cat pdpl-report.md
+        } >> "$GITHUB_STEP_SUMMARY"
+        exit $CODE
+
+    - name: Upload SARIF to code scanning
+      if: ${{ always() && inputs.upload-sarif == 'true' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: pdpl-results.sarif
+        category: pdpl-scanner
+
+    - name: Upload report artifact
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: pdpl-report
+        path: |
+          pdpl-findings.json
+          pdpl-report.md
+          pdpl-results.sarif
