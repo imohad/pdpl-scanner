@@ -19,16 +19,35 @@ and `pdpl_scanner/controls.py`. This page is the readable summary.
 | `PDPL-DSR-01` | Data Subject Rights | high | assisted | Arts. 4, 9 | No data access / export path for subjects |
 | `PDPL-DSR-02` | Data Subject Rights | high | assisted | Arts. 4, 18 | Soft-delete-only erasure (PII retained) |
 | `PDPL-CB-01` | Cross-Border Transfer | critical¹ | auto | Art. 29 + Transfer Regs | Personal data reaching a non-KSA region/endpoint |
+| `PDPL-CB-02` | Cross-Border Transfer | critical¹ | auto | Art. 29 + Transfer Regs | Personal data sent to a foreign third-party processor (analytics/email/CRM/AI/payments) |
 | `PDPL-SEC-01` | Security Safeguards | critical | auto | Art. 19 | TLS verification disabled / plaintext transport of PII |
-| `PDPL-SEC-03` | Security Safeguards | critical | auto | Art. 19 | Hardcoded secret / credential / connection string |
+| `PDPL-SEC-02` | Security Safeguards | high | auto | Art. 19 | Database/transport TLS disabled (`sslmode=disable`) |
+| `PDPL-SEC-03` | Security Safeguards | critical² | auto | Art. 19 | Hardcoded secret / credential / connection string |
 | `PDPL-SEC-05` | Security Safeguards | high | auto | Art. 19 | Weak hashing (MD5/SHA1) for credentials |
 | `PDPL-LOG-01` | Logging & Exposure | high | auto | Art. 19 + minimization | Personal/sensitive data written to logs |
 | `PDPL-SEN-01` | Sensitive Personal Data | critical | assisted | Art. 1 + safeguards | Sensitive fields without elevated handling |
 | `PDPL-RET-01` | Retention & Deletion | medium | assisted | Art. 18 | No retention limit / purge on personal-data stores |
 
-¹ `PDPL-CB-01` severity is set at runtime by the entity profile: **critical** for
+¹ `PDPL-CB-01` / `PDPL-CB-02` severity is set at runtime by the entity profile: **critical** for
 government/financial/critical-infrastructure (effectively prohibited without regulator approval),
 **high** for everyone else (allowed with safeguards). See [entity-types.md](entity-types.md).
+
+² `PDPL-SEC-03` is downgraded to a **medium** WARN lead when the captured value is an obvious
+placeholder/default (e.g. `changeme`, `your_password`) or low-entropy, so default config templates
+don't fail the gate. Real-format secrets (AWS keys, private keys, credentialed URLs) stay critical.
+
+**Assisted leads vs. auto fails.** `auto` controls produce confirmed `FAIL`s that gate the build.
+`assisted` controls produce high-recall `LEAD`s (a `WARN`) that **never fail the gate on their own** —
+they are surfaced for a human or the bundled Claude skill to triage in context. `PDPL-DSR-01`,
+`PDPL-RET-01`, and `PDPL-LB-01` fire repo-wide (no single line) when personal data is handled but no
+export, retention, or consent signal is found anywhere in the tree.
+
+### Suppressing findings
+
+- **Inline:** add `# pdpl-ignore` to suppress all controls on a line, or `# pdpl-ignore[PDPL-SEC-03]`
+  (comma-separated) for specific ones. A directive also covers the line directly below it.
+- **File globs:** add patterns to a `.pdplignore` file at the scan root (gitignore-style), or pass
+  `--exclude '<glob>'` (repeatable). Path-segment names (e.g. `tests`) still work.
 
 ## Manual-verify controls (organizational)
 
