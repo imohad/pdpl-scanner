@@ -18,7 +18,7 @@ from .entity_profiles import CLASSIFICATION
 from . import _meta
 
 REG_LINE = "Saudi PDPL (Royal Decree M/19, amended by M/148) + Implementing Regulations + sector overlays"
-TOOL_VERSION = "1.1.0"
+TOOL_VERSION = "1.1.1"
 SARIF_LEVEL = {"critical": "error", "high": "error", "medium": "warning", "low": "note"}
 
 

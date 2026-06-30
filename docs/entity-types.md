@@ -17,7 +17,7 @@ A single workload in the Kingdom can sit under several authorities at once:
 - **CST (CCRF)** — the Cloud Computing Regulatory Framework defines cloud service levels aligned to the
   NDMO classification, and bars moving Saudi Government content outside the Kingdom, even temporarily,
   unless permitted.
-- **NCA** — Essential Cybersecurity Controls (ECC 4.2.3.3 requires hosting and storage inside the
+- **NCA** — Essential Cybersecurity Controls (ECC-2:2024 requires hosting and storage inside the
   Kingdom) and Cloud Cybersecurity Controls (CCC), mandatory for government, semi-government, and
   operators of Critical National Infrastructure.
 - **SAMA** — the Saudi Central Bank's Cloud Computing Regulatory Framework, Cyber Security Framework,
@@ -54,7 +54,7 @@ using cloud services and explicitly before any cloud located outside the Kingdom
 outsourcing abroad needs SAMA no-objection. A cross-border flow here is a critical finding.
 
 ### critical_infrastructure
-Overlays: NCA ECC + CCC. Residency: **prohibited without approval**. NCA ECC 4.2.3.3 requires hosting
+Overlays: NCA ECC + CCC. Residency: **prohibited without approval**. NCA ECC-2:2024 requires hosting
 and storage inside the Kingdom for in-scope organizations.
 
 ### health

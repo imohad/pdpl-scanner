@@ -41,7 +41,7 @@ Fails the gate on 3 critical and 2 high confirmed finding(s), plus 2 assisted le
 ### ❌ FAIL · [HIGH] PDPL-LB-03 — Pre-ticked / default-on consent
 - **Where:** `signup.jsx:1`
 - **Evidence:** `<input type="checkbox" name="consent" defaultChecked={true} />`
-- **PDPL:** Art. 6 (free, affirmative consent)
+- **PDPL:** Art. 5 (consent required) + Art. 7 (consent not a precondition of service)
 - **Fix:** Default consent inputs to unchecked; block processing when consent is false.
 
 ### ❌ FAIL · [HIGH] PDPL-LOG-01 — Personal/sensitive data written to logs
@@ -70,12 +70,12 @@ Real PDPL obligations the scanner cannot prove from code. Confirm with your DPO/
 - [ ] **SAMA-CLOUD-01** — SAMA approval obtained before using cloud services; explicit approval for any cloud outside the Kingdom  _(PDPL: SAMA Cloud Computing Regulatory Framework)_
 - [ ] **SAMA-RESID-01** — Highly sensitive customer/financial data resides in-Kingdom with in-Kingdom key management  _(PDPL: SAMA CCRF / Cyber Security Framework)_
 - [ ] **SAMA-OUT-01** — Material outsourcing register maintained; SAMA no-objection for material outsourcing abroad  _(PDPL: SAMA Rules on Outsourcing)_
-- [ ] **NCA-ECC-01** — Information hosting and storage inside the Kingdom (NCA ECC 4.2.3.3)  _(PDPL: NCA Essential Cybersecurity Controls)_
+- [ ] **NCA-ECC-01** — Information hosting and storage inside the Kingdom (NCA ECC-2:2024)  _(PDPL: NCA Essential Cybersecurity Controls (ECC-2:2024))_
 
 ## Scope & limits
 This scan covers the engineering layer of PDPL (technical and organizational safeguards detectable in code and config). It is **not a legal certification** and does not replace SDAIA registration, a DPIA, sector approvals (SAMA/CST/NCA/NDMO), or legal review.
 
-> **Rule freshness:** Compliance rules current as of 2026-06-30 (1 days ago). Saudi data-protection rules change; re-verify periodically.
+> **Rule freshness:** Compliance rules current as of 2026-07-01 (0 days ago). Saudi data-protection rules change; re-verify periodically.
 
 ---
 
@@ -107,7 +107,7 @@ This scan covers the engineering layer of PDPL (technical and organizational saf
 
 ### ❌ FAIL · [HIGH] PDPL-LB-03 — خانة موافقة مفعّلة افتراضياً
 - **الموضع:** `signup.jsx:1`
-- **المرجع النظامي:** Art. 6 (free, affirmative consent)
+- **المرجع النظامي:** Art. 5 (consent required) + Art. 7 (consent not a precondition of service)
 - **الإصلاح:** اجعل خانات الموافقة غير مفعّلة افتراضياً، وامنع المعالجة عند رفض الموافقة.
 
 ### ❌ FAIL · [HIGH] PDPL-LOG-01 — تسجيل بيانات شخصية/حساسة في السجلات
@@ -134,11 +134,11 @@ This scan covers the engineering layer of PDPL (technical and organizational saf
 - [ ] **SAMA-CLOUD-01** — الحصول على موافقة ساما قبل استخدام الخدمات السحابية، وموافقة صريحة لأي سحابة خارج المملكة
 - [ ] **SAMA-RESID-01** — بقاء بيانات العملاء/المالية الحساسة داخل المملكة مع إدارة مفاتيح داخل المملكة
 - [ ] **SAMA-OUT-01** — سجل إسناد جوهري، وعدم ممانعة من ساما للإسناد الجوهري للخارج
-- [ ] **NCA-ECC-01** — استضافة وتخزين المعلومات داخل المملكة (ضوابط الأمن السيبراني الأساسية 4.2.3.3)
+- [ ] **NCA-ECC-01** — استضافة وتخزين المعلومات داخل المملكة (ضوابط الأمن السيبراني الأساسية ECC-2:2024)
 
 ## النطاق والحدود
 يغطي هذا الفحص الطبقة الهندسية من النظام، وليس شهادة امتثال نظامية، ولا يغني عن التسجيل في سدايا أو تقييم الأثر أو موافقات الجهات القطاعية (ساما/هيئة الاتصالات/الأمن السيبراني/NDMO).
 
-> **حداثة القواعد:** قواعد الامتثال محدّثة حتى 2026-06-30 (قبل 1 يوماً). أنظمة حماية البيانات في المملكة تتغيّر، فأعد التحقق دورياً.
+> **حداثة القواعد:** قواعد الامتثال محدّثة حتى 2026-07-01 (قبل 0 يوماً). أنظمة حماية البيانات في المملكة تتغيّر، فأعد التحقق دورياً.
 
 </div>

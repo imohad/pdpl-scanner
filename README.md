@@ -39,7 +39,7 @@ Auto-checks passed: PDPL-CB-02, PDPL-SEC-02, PDPL-SEC-05
 Manual-verify (confirm with DPO/legal):
   [ ] SAMA-CLOUD-01  SAMA approval before cloud use / any cloud outside the Kingdom
   [ ] SAMA-RESID-01  Highly sensitive financial data resides in-Kingdom + in-Kingdom key mgmt
-  [ ] NCA-ECC-01     Information hosting and storage inside the Kingdom (ECC 4.2.3.3)
+  [ ] NCA-ECC-01     Information hosting and storage inside the Kingdom (ECC-2:2024)
   ... +6 more
 ```
 
@@ -143,7 +143,7 @@ The questionnaire asks who you are. That answer changes the residency verdict an
 |---|---|---|
 | `government` | NDMO + NCA ECC | **Prohibited without approval** — must stay in-Kingdom; classification-driven |
 | `financial` | SAMA + NCA ECC | **Prohibited without approval** — SAMA approval required before cloud, explicitly for any cloud outside KSA |
-| `critical_infrastructure` | NCA ECC + CCC | **Prohibited without approval** — hosting inside the Kingdom (ECC 4.2.3.3) |
+| `critical_infrastructure` | NCA ECC + CCC | **Prohibited without approval** — hosting inside the Kingdom (ECC-2:2024) |
 | `health` | MOH / Saudi Health Council + SFDA | **In-Kingdom by default** — health data is sensitive; HIE controls apply |
 | `telecom` / `cloud_provider` | CST CCRF | **In-Kingdom by default** — Saudi Government content must not leave the Kingdom |
 | `private_general` / `nonprofit` | PDPL base | **Allowed with safeguards** — lawful basis + SCCs/adequacy/exception + transfer risk assessment |
@@ -171,7 +171,7 @@ The catalog maps each PDPL obligation to a detection mode. Highlights:
 | Retention | `PDPL-RET-01` retention limits | assisted |
 | Governance & records | `PDPL-GOV-02..07`, `BR-01` 72h breach | manual |
 
-`auto` controls produce a confirmed **FAIL** (gates the build) with file:line evidence. `assisted` controls produce high-recall **LEAD**s — a `WARN` that **never fails the gate on its own**, best triaged by a human or the bundled Claude skill. `manual` controls are organizational obligations surfaced for sign-off. Full machine-readable catalog: [`controls/pdpl-controls.yaml`](controls/pdpl-controls.yaml). Human-readable: [`docs/controls-catalog.md`](docs/controls-catalog.md).
+`auto` controls produce a confirmed **FAIL** (gates the build) with file:line evidence. `assisted` controls produce high-recall **LEAD**s — a `WARN` that **never fails the gate on its own**, best triaged by a human or the bundled Claude skill. `manual` controls are organizational obligations surfaced for sign-off. Full machine-readable catalog: [`controls/pdpl-controls.yaml`](controls/pdpl-controls.yaml). Human-readable: [`docs/controls-catalog.md`](docs/controls-catalog.md). For exactly **what PDPL requires vs. what the tool checks — including the gaps** — see the [**PDPL coverage map**](docs/coverage-map.md) (article references independently verified against SDAIA's published text).
 
 ### Tuning the noise: suppression
 

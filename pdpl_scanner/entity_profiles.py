@@ -12,7 +12,7 @@ Sources distilled into this module:
   (4 levels: Top Secret, Secret, Confidential, Public).
 - CST Cloud Computing Regulatory Framework (CCRF): cloud levels aligned to NDMO classification;
   CSPs must not move Saudi Government content outside the Kingdom, even temporarily, unless permitted.
-- NCA Essential Cybersecurity Controls (ECC 4.2.3.3: hosting/storage inside the Kingdom) + Cloud
+- NCA Essential Cybersecurity Controls (ECC-2:2024; in-Kingdom hosting/storage requirement) + Cloud
   Cybersecurity Controls (CCC), mandatory for government, semi-government, and CNI operators.
 - SAMA Cloud Computing Regulatory Framework + Cyber Security Framework + Rules on Outsourcing:
   highly sensitive financial/customer data must reside in-Kingdom; SAMA approval required before
@@ -191,9 +191,9 @@ OVERLAY_CONTROLS: Dict[str, List[dict]] = {
     ],
     "NCA-ECC": [
         {"id": "NCA-ECC-01", "severity": "high",
-         "title_en": "Information hosting and storage inside the Kingdom (NCA ECC 4.2.3.3)",
-         "title_ar": "استضافة وتخزين المعلومات داخل المملكة (ضوابط الأمن السيبراني الأساسية 4.2.3.3)",
-         "ref": "NCA Essential Cybersecurity Controls"},
+         "title_en": "Information hosting and storage inside the Kingdom (NCA ECC-2:2024)",
+         "title_ar": "استضافة وتخزين المعلومات داخل المملكة (ضوابط الأمن السيبراني الأساسية ECC-2:2024)",
+         "ref": "NCA Essential Cybersecurity Controls (ECC-2:2024)"},
     ],
     "NCA-CCC": [
         {"id": "NCA-CCC-01", "severity": "high",
