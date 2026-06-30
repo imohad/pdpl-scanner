@@ -1,0 +1,17 @@
+# Use pdpl-scanner with the pre-commit framework (https://pre-commit.com).
+# In a consuming repo's .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/imohad/pdpl-scanner
+#       rev: v1.1.0
+#       hooks:
+#         - id: pdpl-scan
+#           args: [".", "--fail-on", "critical"]   # or rely on a committed pdpl.config.yaml
+#
+- id: pdpl-scan
+  name: PDPL compliance scan
+  description: Scan the codebase for Saudi PDPL violations (entity-aware) and block on the gate.
+  entry: pdpl-scan
+  language: python
+  pass_filenames: false
+  always_run: true

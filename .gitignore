@@ -9,4 +9,5 @@ venv/
 pdpl-findings.json
 pdpl-results.sarif
 pdpl-report.md
+pdpl-report.html
 .DS_Store

@@ -60,7 +60,8 @@ runs:
           --fail-on "${{ inputs.fail-on }}" \
           --json pdpl-findings.json \
           --sarif pdpl-results.sarif \
-          --markdown pdpl-report.md
+          --markdown pdpl-report.md \
+          --html pdpl-report.html
         CODE=$?
         GATE=$(python -c "import json;print(json.load(open('pdpl-findings.json'))['summary']['gate'])")
         SCORE=$(python -c "import json;print(json.load(open('pdpl-findings.json'))['summary']['score'])")
@@ -88,4 +89,5 @@ runs:
         path: |
           pdpl-findings.json
           pdpl-report.md
+          pdpl-report.html
           pdpl-results.sarif
